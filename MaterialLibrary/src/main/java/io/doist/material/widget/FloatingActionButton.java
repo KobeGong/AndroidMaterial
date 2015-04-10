@@ -24,7 +24,7 @@ public class FloatingActionButton extends ImageButton implements ElevationDelega
     private ColorStateList mColor;
 
     private boolean mIsMini;
-    private int mRadius;
+    private int mSize;
 
     private GradientDrawable mCircleDrawable; // To change the color of the circle.
     private TintDrawable mTintDrawable; // To change the color of the circle in compat mode.
@@ -180,16 +180,17 @@ public class FloatingActionButton extends ImageButton implements ElevationDelega
 
     private void internalSetIsMini(boolean isMini) {
         mIsMini = isMini;
-        mRadius = getResources().getDimensionPixelOffset(isMini ? R.dimen.fab_mini_radius : R.dimen.fab_radius);
+        int radius = getResources().getDimensionPixelOffset(isMini ? R.dimen.fab_mini_radius : R.dimen.fab_radius);
+        mSize = radius * 2;
 
         if (mElevationDelegate != null) {
-            mElevationDelegate.setCornerRadius(mRadius);
+            mElevationDelegate.setCornerRadius(radius);
         }
 
         // Re-set layout params so that width and height are adjusted accordingly.
         ViewGroup.LayoutParams params = getLayoutParams();
         if (params != null) {
-            setLayoutParams(params);
+            internalSetLayoutParams(params);
         }
     }
 
@@ -217,14 +218,18 @@ public class FloatingActionButton extends ImageButton implements ElevationDelega
 
     @Override
     public void setLayoutParams(ViewGroup.LayoutParams params) {
-        if (params.width != ViewGroup.LayoutParams.WRAP_CONTENT
-                || params.height != ViewGroup.LayoutParams.WRAP_CONTENT) {
+        if ((params.width != mSize && params.width != ViewGroup.LayoutParams.WRAP_CONTENT)
+                || (params.height != mSize && params.height != ViewGroup.LayoutParams.WRAP_CONTENT)) {
             throw new IllegalStateException("FloatingActionButton 'android:width' and 'android:height' values must be "
                                                     + "'wrap_content'. Check 'isMini' attribute to manipulate size.");
         }
+        internalSetLayoutParams(params);
+    }
 
-        params.width = mRadius * 2;
-        params.height = mRadius * 2;
+
+    private void internalSetLayoutParams(ViewGroup.LayoutParams params) {
+        params.width = mSize;
+        params.height = mSize;
 
         if (mElevationDelegate != null) {
             mElevationDelegate.setLayoutParams(params);
